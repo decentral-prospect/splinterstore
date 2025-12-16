@@ -789,7 +789,7 @@ private fun SettingsHome(onOpenPeers: () -> Unit, modifier: Modifier = Modifier)
         Spacer(modifier = Modifier.weight(1f))
 
         Text(
-            "Version 0.0.1",
+            "Version 0.0.2",
             style = MaterialTheme.typography.labelMedium,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
         )

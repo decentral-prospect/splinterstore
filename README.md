@@ -150,7 +150,7 @@ Each app object:
 ### Important note
 For the app catalog to show anything, the index repository must be reachable.
 
-Default index repo: https://ouisync.net/r#AwIgh4yZF3zfZ18seYQb320u7QNeu2fw4PAqUd9RK7gjyfc?name=index
+Default index repo: https://ouisync.net/r#AwEgLOP2aHS9R4inhIyRIEAcZgyDSz-auVOltFxEnytAHkYgOW10G5WjovhC_MxE9gBuLGjoTseV0ZhbKj72EubYvio?name=Apps
 
 ## What's new
 

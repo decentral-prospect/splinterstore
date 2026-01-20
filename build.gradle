@@ -5,6 +5,14 @@ plugins {
     id "org.jetbrains.kotlin.plugin.serialization" version "2.2.10"
 }
 
+def localProps = new Properties()
+def localPropsFile = rootProject.file("local.properties")
+if (localPropsFile.exists()) {
+    localPropsFile.withInputStream { localProps.load(it) }
+}
+
+def indexToken = localProps.getProperty("OUISYNC_INDEX_REPO_TOKEN", "")
+def iconsToken = localProps.getProperty("OUISYNC_ICONS_REPO_TOKEN", "")
 
 android {
     namespace = 'org.equalitie.ouisync.kotlin.example'
@@ -16,6 +24,10 @@ android {
         targetSdk 34
         versionCode 1
         versionName '0.0.1'
+
+        // values from local.properties (may be empty)
+        buildConfigField "String", "OUISYNC_INDEX_REPO_TOKEN", "\"${indexToken.replace("\"", "\\\"")}\""
+        buildConfigField "String", "OUISYNC_ICONS_REPO_TOKEN", "\"${iconsToken.replace("\"", "\\\"")}\""
     }
 
     compileOptions {
@@ -29,12 +41,12 @@ android {
 
     buildFeatures {
         compose = true
+        buildConfig = true
     }
 }
 
 dependencies {
     implementation platform('androidx.compose:compose-bom:2024.12.01')
-
 
     implementation 'androidx.compose.material3:material3'
     implementation 'androidx.compose.material:material-icons-extended'
@@ -50,5 +62,4 @@ dependencies {
     implementation "ie.equalit.ouinet:ouisync-android:0.9.2-2"
     implementation "ie.equalit.ouinet:ouisync-session:0.9.2-2"
     implementation "ie.equalit.ouinet:ouisync-service:0.9.2-2"
-
 }

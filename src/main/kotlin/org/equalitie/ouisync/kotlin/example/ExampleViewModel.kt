@@ -45,12 +45,22 @@ import org.equalitie.ouisync.session.subscribe
 private const val TAG = "ouisync.example"
 
 private const val DEFAULT_REPOSITORY_NAME = "index"
-private const val DEFAULT_REPOSITORY_TOKEN =
+private const val ICONS_REPOSITORY_NAME = "icons"
+private const val DEFAULT_REPOSITORY_TOKEN_FALLBACK =
     "https://ouisync.net/r#AwEgLOP2aHS9R4inhIyRIEAcZgyDSz-auVOltFxEnytAHkYgOW10G5WjovhC_MxE9gBuLGjoTseV0ZhbKj72EubYvio?name=Apps"
 
-private const val ICONS_REPOSITORY_NAME = "icons"
-private const val ICONS_REPOSITORY_TOKEN =
+private const val ICONS_REPOSITORY_TOKEN_FALLBACK =
     "https://ouisync.net/r#AwEgljZ2Zac95VB-D1ckOXInf6e42IKpIO4tTfYRg9g7sLQgwODn4oA9KxlY77Ab17iG9XnpFg-hfwMQC9TpQXeZfHY?name=icons"
+
+private val DEFAULT_REPOSITORY_TOKEN: String by lazy {
+    val v = BuildConfig.OUISYNC_INDEX_REPO_TOKEN.trim()
+    if (v.isNotBlank()) v else DEFAULT_REPOSITORY_TOKEN_FALLBACK
+}
+
+private val ICONS_REPOSITORY_TOKEN: String by lazy {
+    val v = BuildConfig.OUISYNC_ICONS_REPO_TOKEN.trim()
+    if (v.isNotBlank()) v else ICONS_REPOSITORY_TOKEN_FALLBACK
+}
 
 class ExampleViewModel(
     private val configDir: String,
@@ -94,7 +104,6 @@ class ExampleViewModel(
     init {
         cacheDirFile.mkdirs()
         initLog()
-
         viewModelScope.launch(Dispatchers.IO) {
             try {
                 service = Service.start(configDir)

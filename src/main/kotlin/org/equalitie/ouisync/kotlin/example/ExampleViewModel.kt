@@ -48,10 +48,8 @@ private const val DEFAULT_REPOSITORY_NAME = "index"
 private const val ICONS_REPOSITORY_NAME = "icons"
 private const val DEFAULT_REPOSITORY_TOKEN_FALLBACK =
     "https://ouisync.net/r#AwEgLOP2aHS9R4inhIyRIEAcZgyDSz-auVOltFxEnytAHkYgOW10G5WjovhC_MxE9gBuLGjoTseV0ZhbKj72EubYvio?name=Apps"
-
 private const val ICONS_REPOSITORY_TOKEN_FALLBACK =
     "https://ouisync.net/r#AwEgljZ2Zac95VB-D1ckOXInf6e42IKpIO4tTfYRg9g7sLQgwODn4oA9KxlY77Ab17iG9XnpFg-hfwMQC9TpQXeZfHY?name=icons"
-
 private val DEFAULT_REPOSITORY_TOKEN: String by lazy {
     val v = BuildConfig.OUISYNC_INDEX_REPO_TOKEN.trim()
     if (v.isNotBlank()) v else DEFAULT_REPOSITORY_TOKEN_FALLBACK
@@ -106,38 +104,44 @@ class ExampleViewModel(
         initLog()
         viewModelScope.launch(Dispatchers.IO) {
             try {
-                service = Service.start(configDir)
-            } catch (e: OuisyncException.ServiceAlreadyRunning) {
-                Log.d(TAG, "Service already running")
-            } catch (e: Exception) {
-                Log.e(TAG, "Service.start failed", e)
-                sessionError = e.toString()
-            }
-
-            if (service != null) {
                 try {
-                    session = Session.create(configDir)
-                    session?.setStoreDir(storeDir)
-                } catch (e: Exception) {
-                    Log.e(TAG, "Session.create failed", e)
-                    sessionError = e.toString()
-                } catch (e: java.lang.Error) {
-                    Log.e(TAG, "Session.create failed", e)
-                    sessionError = e.toString()
+                    service = Service.start(configDir)
+                } catch (e: OuisyncException.ServiceAlreadyRunning) {
+                    Log.d(TAG, "Service already running (ok)")
+                    // НЕ выходим и НЕ блокируем session
                 }
-            }
 
-            session?.let {
-                it.bindNetwork(listOf("quic/0.0.0.0:0", "quic/[::]:0"))
-                it.setPortForwardingEnabled(true)
-                it.setLocalDiscoveryEnabled(true)
-                runCatching { it.addUserProvidedPeers(defaultPeers) }
+                session = Session.create(configDir).also { s ->
+                    s.setStoreDir(storeDir)
+
+                    s.bindNetwork(
+                        listOf(
+                            "quic/0.0.0.0:0",
+                            "quic/[::]:0",
+                            "tcp/0.0.0.0:0",
+                            "tcp/[::]:0",
+                        )
+                    )
+
+                    s.setPortForwardingEnabled(true)
+                    s.setLocalDiscoveryEnabled(false)
+
+                    val res = runCatching { s.addUserProvidedPeers(defaultPeers) }
+                    Log.d(TAG, "addUserProvidedPeers=${res.isSuccess} err=${res.exceptionOrNull()}")
+                }
+
+
+            } catch (e: Throwable) {
+                Log.e(TAG, "Init failed", e)
+                sessionError = e.toString()
+                return@launch
             }
 
             ensureDefaultRepository()
             ensureIconsRepository()
             startPeerMonitor()
         }
+
     }
 
 
